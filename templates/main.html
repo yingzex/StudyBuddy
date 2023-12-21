@@ -10,6 +10,16 @@
     <!-- navigation bar on top of every page. -->
     <!-- include template navbar.html -->
     {% include 'navbar.html' %} 
+
+    {% if messages %}
+    <ul class="messages">
+        <!-- if there are messages, print it -->
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
     {% block content %}
     <!-- tell website when to add all child template when wrapping a parent page -->
     {% endblock %}

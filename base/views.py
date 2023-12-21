@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect
 # from django.http import HttpResponse
 from .models import Room, Topic
 from .forms import RoomForm
-
+from django.db.models import Q
+from django.contrib.auth.models import User 
+from django.contrib import messages 
+from django.contrib.auth import authenticate, login, logout
 
 # Create your views here.
 
@@ -12,11 +15,46 @@ from .forms import RoomForm
 #     {'id':3, 'name':'backend'},
 # ]
 
+def loginPage(request):
+    if request.method == 'POST':
+        # these two values are sent from frontend
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try: # user exist
+            user = User.objects.get(username=username)
+        except: # user not exist
+            messages.error(request, 'User does not exist')
+
+        # authenticate this user, return a user object or an error
+        user = authenticate(request, username=username, password=password) 
+
+        # use the user to login
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Username or Password does not exist')
+
+    context = {}
+    return render(request, 'base/login_register.html', context)
+
+def logoutUser(request):
+    logout(request)
+    return redirect('home')
+
 def home(request):
     q = request.GET.get('q') if request.GET.get('q')!=None else '' # get parameter q from url
-    rooms = Room.objects.filter(topic__name__icontains=q) # all rooms in the database 
+    # filter: get all rooms in the database that meet requirement
+    # search based on 3 attributes, any of them contains q
+    rooms = Room.objects.filter(
+        Q(topic__name__icontains=q) |
+        Q(name__icontains=q) | 
+        Q(description__icontains=q)) 
     topics = Topic.objects.all()
-    context = {'rooms':rooms, 'topics':topics}
+    room_count = rooms.count()
+
+    context = {'rooms':rooms, 'topics':topics, 'room_count':room_count}
     # return HttpResponse('Home page') # return http response
     return render(request, 'base/home.html', context) # pass dictionary rooms
 
