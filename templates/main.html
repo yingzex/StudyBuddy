@@ -1,0 +1,17 @@
+<!-- wrapper around all templates -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>studyBud</title>
+</head>
+<body>
+    <!-- navigation bar on top of every page. -->
+    <!-- include template navbar.html -->
+    {% include 'navbar.html' %} 
+    {% block content %}
+    <!-- tell website when to add all child template when wrapping a parent page -->
+    {% endblock %}
+</body>
+</html>
