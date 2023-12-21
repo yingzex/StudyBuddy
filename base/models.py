@@ -19,7 +19,7 @@ class Room(models.Model): # inherit from models (make the class a django model)
     name = models.CharField(max_length=200)
     # null: value can be null, blank: when submitting a form, the form can be empty
     description = models.TextField(null=True, blank=True)
-    # participants = 
+    participants = models.ManyToManyField(User, related_name='participants', blank=True) # user and room: many to many relationship
     # every time the save method is called, take a timestamp
     updated = models.DateTimeField(auto_now=True)
     # only the first tie save or create this instance, take a timestamp

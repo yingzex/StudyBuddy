@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Room, Topic
+from .models import Room, Topic, Message
 from .forms import RoomForm
 from django.db.models import Q
 from django.contrib.auth.models import User 
@@ -81,7 +81,20 @@ def home(request):
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
-    context = {'room':room} 
+    room_messages = room.message_set.all().order_by('-created') # query child objects of a specific room
+    participants = room.participants.all()
+
+    if request.method == 'POST':
+        # create a message
+        message = Message.objects.create(
+            user = request.user,
+            room = room,
+            body = request.POST.get('body') # passed from room.html
+        )
+        room.participants.add(request.user) # when a user send a message in a room, add the user to participants
+        return redirect('room', pk=room.id) # reload the page and use get request instead
+
+    context = {'room':room, 'room_messages':room_messages, 'participants':participants} 
     # pass in value of room into base/room.html
     return render(request, 'base/room.html', context)
 
@@ -127,7 +140,23 @@ def deleteRoom(request, pk):
         return HttpResponse('you are not allowed here')
 
     if request.method == 'POST':
-            room.delete()
-            return redirect('home') 
+        room.delete()
+        return redirect('home') 
 
     return render(request, 'base/delete.html', {'obj':room})
+
+
+@login_required(login_url='login')
+def deleteMessage(request, pk):
+    # get the room
+    message = Message.objects.get(id=pk)
+
+    # not the owner of the msg
+    if request.user != message.user:
+        return HttpResponse('you are not allowed here')
+
+    if request.method == 'POST':
+        message.delete()
+        return redirect('home') 
+
+    return render(request, 'base/delete.html', {'obj':message})
