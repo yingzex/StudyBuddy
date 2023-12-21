@@ -32,8 +32,11 @@
         <div>
             {% for room in rooms %}
                 <div>
+                    <!-- only owner of room can see update and delete button -->
+                    {% if request.user == room.host %}
                     <a href="{% url 'update-room' room.id %}">Edit</a>
                     <a href="{% url 'delete-room' room.id %}">Delete</a>
+                    {% endif %}
                     <span>@{{room.host.username}}</span>
                     <!-- room name clickable: pass in the variable of room id-->
                     <!-- <h5>{{room.id}} -- <a href="/room/{{room.id}}">{{room.name}}</a></h5> -->

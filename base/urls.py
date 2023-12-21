@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path('login/', views.loginPage, name="login"),
     path('logout/', views.logoutUser, name="logout"),
+    path('register/', views.registerPage, name="register"),
 
     path('', views.home, name='home'), # when user input empty url, trigger function home
     path('room/<str:pk>/', views.room, name='room'), # when user input this url, trigger function room 
