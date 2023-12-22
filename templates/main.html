@@ -1,10 +1,12 @@
 <!-- wrapper around all templates -->
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>studyBud</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'styles/main.css' %}">
 </head>
 <body>
     <!-- navigation bar on top of every page. -->
@@ -19,6 +21,8 @@
         {% endfor %}
     </ul>
     {% endif %}
+
+    <!-- <img src="{% static 'images/Models.jpg' %}"/> -->
 
     {% block content %}
     <!-- tell website when to add all child template when wrapping a parent page -->
