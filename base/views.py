@@ -10,12 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 # Create your views here.
 
-# rooms = [
-#     {'id':1, 'name':'learn python'},
-#     {'id':2, 'name':'front'},
-#     {'id':3, 'name':'backend'},
-# ]
-
 def loginPage(request):
     page = 'login'
     # redirect loged in user to home page
@@ -71,7 +65,7 @@ def home(request):
     rooms = Room.objects.filter(
         Q(topic__name__icontains=q) |
         Q(name__icontains=q) | 
-        Q(description__icontains=q)) 
+        Q(description__icontains=q))
     topics = Topic.objects.all()
     room_count = rooms.count()
     room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
@@ -111,13 +105,18 @@ def userProfile(request, pk):
 @login_required(login_url='login') # if session id not in browser, redirect to login page
 def createRoom(request):
     form = RoomForm()
+    topics = Topic.objects.all()
     if request.method == 'POST':
-        # print(request.POST) # data submited by user
-        form = RoomForm(request.POST) # pass all post data into form, let form extract value
-        if form.is_valid():
-            form.save() # save that model in database
-            return redirect('home') # redirect user to home page
-    context = {'form': form} # pass into room_form.html
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
+        Room.objects.create(
+            host=request.user,
+            topic=topic, # newly created topic, or topic from database
+            name=request.POST.get('name'), # get from frontend
+            description=request.POST.get('description') # get from frontend
+        )
+        return redirect('home') # redirect user to home page
+    context = {'form': form, 'topics': topics} # pass into room_form.html
     return render(request, 'base/room_form.html', context)
 
 
@@ -125,17 +124,20 @@ def createRoom(request):
 def updateRoom(request, pk):
     room = Room.objects.get(id=pk) # get the old room instance
     form = RoomForm(instance=room) # form will be prefilled with previous value
-
+    topics=Topic.objects.all()
     # not the owner of the room
     if request.user != room.host:
         return HttpResponse('you are not allowed here')
 
     if request.method == 'POST':
-        form = RoomForm(request.POST, instance=room) # update value of the room instance
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    context = {'form': form}
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
+        room.name=request.POST.get('name')
+        room.topic=topic
+        room.description=request.POST.get('name')
+        room.save()
+        return redirect('home')
+    context = {'form': form, 'topics':topics, 'room':room}
     return render(request, 'base/room_form.html', context)
 
 
