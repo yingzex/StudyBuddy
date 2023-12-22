@@ -11,6 +11,7 @@ urlpatterns = [
     path('room/<str:pk>/', views.room, name='room'), # when user input this url, trigger function room 
     # also pass argument pk into function room (pk is in the url, is string type)
     # user can pass in dynamic value, eg. room/1 
+    path('profile/<str:pk>/', views.userProfile, name='user-profile'),
 
     path('create-room/', views.createRoom, name="create-room"),
     path('update-room/<str:pk>/', views.updateRoom, name="update-room"),

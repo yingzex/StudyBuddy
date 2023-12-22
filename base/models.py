@@ -44,5 +44,9 @@ class Message(models.Model):
     # only the first tie save or create this instance, take a timestamp
     created = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # order by descending updated time, then created time
+        ordering = ['-updated', '-created']
+
     def __str__(self):
         return self.body[0:50] # only 50 chars in msg
