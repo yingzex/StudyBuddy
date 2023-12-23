@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Room, Topic, Message
-from .forms import RoomForm, UserForm
+from .models import Room, Topic, Message, User
+from .forms import RoomForm, UserForm, MyUserCreationForm
 from django.db.models import Q
-from django.contrib.auth.models import User 
+# from django.contrib.auth.models import User 
 from django.contrib import messages 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+# from django.contrib.auth.forms import UserCreationForm
 # Create your views here.
 
 def loginPage(request):
@@ -18,16 +18,16 @@ def loginPage(request):
 
     if request.method == 'POST':
         # these two values are sent from frontend
-        username = request.POST.get('username').lower()
+        email = request.POST.get('email').lower()
         password = request.POST.get('password')
 
         try: # user exist
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
         except: # user not exist
             messages.error(request, 'User does not exist')
 
         # authenticate this user, return a user object or an error
-        user = authenticate(request, username=username, password=password) 
+        user = authenticate(request, email=email, password=password) 
 
         # use the user to login
         if user is not None:
@@ -44,9 +44,9 @@ def logoutUser(request):
     return redirect('home')
 
 def registerPage(request):
-    form = UserCreationForm()
+    form = MyUserCreationForm()
     if request.method == 'POST':
-        form = UserCreationForm(request.POST) # request.POST is username and password we sent
+        form = MyUserCreationForm(request.POST) # request.POST is username and password we sent
         if form.is_valid(): # user get created
             user = form.save(commit=False) # commit=False: so we can access user before save it
             user.username = user.username.lower() # make sure username is lower case
@@ -179,7 +179,7 @@ def updateUser(request):
     user=request.user
     form=UserForm(instance=user)
     if request.method=='POST':
-        form=UserForm(request.POST, instance=user)
+        form=UserForm(request.POST, request.FILES,instance=user)
         if form.is_valid():
             form.save()
             return redirect('user-profile',pk=user.id)
